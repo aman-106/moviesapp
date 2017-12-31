@@ -59,8 +59,8 @@ class FormExample extends React.Component{
           </Row>
 
           <Row className="show-grid">
-            <Col xs={6} xsOffset={6}>
-              <Button bsStyle="primary">Primary</Button>
+            <Col xs={12} md={4}>
+              <Button bsStyle="primary">Login</Button>
             </Col>
           </Row>
 
