@@ -4,45 +4,25 @@ import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/css/bootstrap-theme.css';
 
-class FormExample extends React.Component{
-  constructor(props){
-    super(props);
-    this.state={
-      value: '',
-    };
-    this.getValidationState = this.getValidationState.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  getValidationState() {
-    const length = this.state.value.length;
-    if (length > 10) return 'success';
-    else if (length > 5) return 'warning';
-    else if (length > 0) return 'error';
-    return null;
-  }
-
-  handleChange(e) {
-    this.setState({ value: e.target.value });
-  }
+class LoginPage extends React.Component{
 
   render() {
     return (
       <form>
         <FormGroup
           controlId="formBasicText"
-          validationState={this.getValidationState()}
+          onChange={this.props.handleChange}
         >
         <Grid>
           <Row className="show-grid">
             <Col xs={12} md={8}>
-                        <ControlLabel>Username</ControlLabel>
-                        <FormControl
-                          type="text"
-                          value={this.state.value}
-                          placeholder="Enter text"
-                          onChange={this.handleChange}
-                        />
+              <ControlLabel>Username</ControlLabel>
+              <FormControl
+                type="text"
+                name="username"
+                value={this.props.username}
+                placeholder="Enter username"
+              />
             </Col>
           </Row>
 
@@ -51,16 +31,16 @@ class FormExample extends React.Component{
               <ControlLabel>Passphrase</ControlLabel>
               <FormControl
                 type="text"
-                value={this.state.value}
-                placeholder="Enter text"
-                onChange={this.handleChange}
+                name="password"
+                value={this.props.password}
+                placeholder="Enter password"
               />
             </Col>
           </Row>
 
           <Row className="show-grid">
             <Col xs={12} md={4}>
-              <Button bsStyle="primary">Login</Button>
+              <Button bsStyle="primary" onClick={()=>{this.props.isUserAuthorized();}}>Login</Button>
             </Col>
           </Row>
 
@@ -68,7 +48,8 @@ class FormExample extends React.Component{
       </FormGroup>
     </form>
     );
+
   }
 };
 
-export default FormExample;
+export default LoginPage;
