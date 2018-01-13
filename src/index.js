@@ -7,4 +7,5 @@ import loadLocalUser from './loadLocalUser.js';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 loadLocalUser(document);
+
 registerServiceWorker();

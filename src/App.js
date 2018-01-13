@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/css/bootstrap-theme.css';
 
 import LoginPage from './LoginPage.js';
-
+import HomePage from './HomePage.js';
 class App extends Component {
 
   constructor(props){
@@ -37,6 +37,7 @@ class App extends Component {
   }
 
   handleChange(e) {
+    // console.log("value.."+v);
     let name = e.target.name;
     let value = e.target.value;
     this.setState((prevState,props)=>{
@@ -48,30 +49,28 @@ class App extends Component {
 
   render() {
     console.log(JSON.stringify(this.state));
-    let pagecontent='';
-    if(!this.state.userAuthorized){
-      pagecontent=(
-        <LoginPage
-          username={this.state.username}
-          password={this.state.password}
-          isUserAuthorized={this.isUserAuthorized}
-          handleChange={this.handleChange}
-        />
-      );
-    }else {
-      pagecontent=(
-        <div>
-          welcome to page
-        </div>
-      );
-    }
+    let pagecontent=<HomePage/>;
+    // if(!this.state.userAuthorized){
+    //   pagecontent=(
+    //     <LoginPage
+    //       username={this.state.username}
+    //       password={this.state.password}
+    //       isUserAuthorized={this.isUserAuthorized}
+    //       handleChange={this.handleChange}
+    //     />
+    //   );
+    // }else {
+    //   pagecontent=(
+    //   <HomePage/>
+    //   );
+    // }
     return (
       <div className="container">
         {pagecontent}
       </div>
     );
   }
-  
+
 }
 
 export default App;

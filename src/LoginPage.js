@@ -1,9 +1,6 @@
 import {FormGroup,ControlLabel,FormControl,HelpBlock,Button,Grid, Row, Col} from 'react-bootstrap';
 import React, { Component } from 'react';
 
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap/dist/css/bootstrap-theme.css';
-
 class LoginPage extends React.Component{
 
   render() {
