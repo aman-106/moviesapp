@@ -8,7 +8,7 @@ body {
 
 }
 
-#ratedMoviesList , #ratedMoviesList {
+#ratedMoviesList , #topRatedShows {
   overflow-y: scroll;
   height:800px;
 }

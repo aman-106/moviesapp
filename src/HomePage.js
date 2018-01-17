@@ -36,6 +36,8 @@ class HomePage extends React.Component {
       'topRatedMoviesList' : undefined,
       'searchResult':'searching',
       'isSearchSuccess':false,
+      'istopRatedShowsListLoaded' : false,
+      'topRatedShowsList' : undefined,
     };
   }
 
@@ -64,15 +66,36 @@ class HomePage extends React.Component {
     });
   }
 
+  loadRatedShowsList(){
+    var page ='1';
+    var updateState = this.updateState;
+    var options = { method: 'GET',
+        url: 'https://api.themoviedb.org/3/tv/top_rated',
+        qs: { page: page, language: 'en-US', api_key: '8674492b756e68ce979a14b5e849855e' },
+        body: '{}' };
+
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+      // console.log(body);
+      updateState({
+        'istopRatedShowsListLoaded' : true,
+        'topRatedShowsList':body
+      });
+  	  return body;
+    });
+	}
+
   getListForSearchQuery(searchText='dil'){
     var updateState = this.updateState;
     var options = { method: 'GET',
-      url: 'https://api.themoviedb.org/3/search/keyword',
-      qs:
-       { page: '1',
-         query: searchText,
-         api_key: '8674492b756e68ce979a14b5e849855e' },
-      body: '{}' };
+    url: 'https://api.themoviedb.org/3/search/multi',
+    qs:
+     { include_adult: 'false',
+       page: '1',
+       query:searchText,
+       language: 'en-US',
+       api_key: '8674492b756e68ce979a14b5e849855e' },
+    body: '{}' };
 
     request(options, function (error, response, body) {
       if (error) throw new Error(error);
@@ -95,33 +118,27 @@ class HomePage extends React.Component {
 
   componentWillMount(){
     this.loadTopRatedMovies();
+    this.loadRatedShowsList();
   }
 
-  hide(event){
-    console.log("hide");
-    let showSearchResult = document.querySelector("#showSearchResult");
-    if(showSearchResult){ // not null
-      showSearchResult.style.display = 'none';
-    }
-  }
-
-  componentDidMount(){
-    console.log(this.state.isSearchSuccess);
-    if(this.state.isSearchSuccess){  // only then showSearchResult is in dom
-      document.addEventListener('click',this.hide);
-      let showSearchResult = document.querySelector("#showSearchResult");
-      showSearchResult.addEventListener('click',(event)=>{
-        event.stopPropagation();
-      });
-    }
-  }
+  // componentDidMount(){
+  //   console.log(this.state.isSearchSuccess);
+  //   if(this.state.isSearchSuccess){  // only then showSearchResult is in dom
+  //     document.addEventListener('click',this.hide);
+  //     let showSearchResult = document.querySelector("#showSearchResult");
+  //     showSearchResult.addEventListener('click',(event)=>{
+  //       event.stopPropagation();
+  //     });
+  //   }
+  // }
 
   componentWillUnmount(){
-    document.removeEventListener('click',this.hide);
+    // document.removeEventListener('click',this.hide);
   }
 
   render(){
     let topRatedMoviesGroup = this.state.isTopRatedMoviesLoaded ? (<TopRatedMoviesGroup topRatedMoviesGroupInfo={this.state}/>) :  (<div>Loading..</div>) ;
+    let topRatedShowsGroup=  this.state.istopRatedShowsListLoaded ? (<TopRatedShowsGroup topRatedShowsList={this.state.topRatedShowsList} />) :  (<div>Loading..</div>) ;
     return (
       <Grid>
     		<Row className="show-grid">
@@ -150,17 +167,15 @@ class HomePage extends React.Component {
         <Row className="show-grid">
           <Col xs={6} md={6}>
             <h4>
-              TOP RATED MOVIES
+          		TOP RATED SHOWS
           	</h4>
-            <ListGroup id="ratedMoviesList">
-          		<ListGroupItem href="#link1">Link 1</ListGroupItem>
-          		<ListGroupItem href="#link2">Link 2</ListGroupItem>
-          		<ListGroupItem >Trigger an alert</ListGroupItem>
-          	</ListGroup>
+            {
+              topRatedShowsGroup
+            }
           </Col>
           <Col xs={6} md={6}>
             <h4>
-          		TOP LIKED MOVIES
+          		TOP RATED MOVIES
           	</h4>
             {
               topRatedMoviesGroup
@@ -209,7 +224,7 @@ const ThumbnailInstance = (props)=>(
 const TopRatedMoviesGroup =(props)=>{
   var topRatedMoviesArray = JSON.parse(props.topRatedMoviesGroupInfo['topRatedMoviesList']);
   var results = topRatedMoviesArray['results'];
-  var topRatedMoviesList = getMoviesThumbnailList(results);
+  var topRatedMoviesList = getThumbnailList(results);
 
   return (
     <ListGroup id="ratedMoviesList" >
@@ -218,7 +233,19 @@ const TopRatedMoviesGroup =(props)=>{
   );
 };
 
-function getMoviesThumbnailList(movieData){
+const TopRatedShowsGroup =(props)=>{
+  var topRatedShowsList = JSON.parse(props.topRatedShowsList);
+  var results = topRatedShowsList['results'];
+  var topRatedShows = getThumbnailList(results);
+
+  return (
+    <ListGroup id="topRatedShows" >
+      {topRatedShows}
+    </ListGroup>
+  );
+};
+
+function getThumbnailList(movieData){
   return movieData.map((movie)=>{
       return (
         <ListGroupItem key={movie.id}>
@@ -227,23 +254,66 @@ function getMoviesThumbnailList(movieData){
       );
     });
 }
+
 // SearchResultList searchResult=body
-function SearchResultList(props){
-
-  let maxLen = 6 ; // max list of elements to shoew
-  let searchResponse = JSON.parse(props.searchResponse);
-  if(searchResponse.total_results==0){ // No results
-    return <ListGroupItem  tag="button" action>No results</ListGroupItem>;
+class SearchResultList extends React.Component {
+  constructor(props) {
+    super(props);
   }
 
-  let searchResult = searchResponse.results;
-  if(searchResult.length>maxLen){
-    searchResult = searchResult.slice(0,maxLen);
+  componentDidMount(){
+    document.addEventListener('click',this.hideSearchResultList);
+    let showSearchResult = document.querySelector("#showSearchResult");
+    showSearchResult.addEventListener('click',(event)=>{
+      event.stopPropagation();
+    });
   }
-  return searchResult.map((result)=>{
-    return <ListGroupItem key={result.id} tag="button" action>{result.name}</ListGroupItem>;
-  });
 
+  componentWillUnmount(){
+    document.removeEventListener('click',this.hideSearchResultList);
+  }
+
+  componentWillUpdate(nextProps,nextState){
+    let showSearchResult = document.querySelector("#showSearchResult");
+    showSearchResult.style.display = 'block';
+  }
+
+  hideSearchResultList(event){
+    console.log("hide");
+    let showSearchResult = document.querySelector("#showSearchResult");
+    if(showSearchResult){ // not null
+      showSearchResult.style.display = 'none';
+    }
+  }
+
+  render(){
+    let maxLen = 6 ; // max list of elements to shoew
+    let searchResponse = JSON.parse(this.props.searchResponse);
+    if(searchResponse.total_results==0){ // No results
+      return <ListGroupItem  tag="button" action>No results</ListGroupItem>;
+    }
+    let searchResult = searchResponse.results;
+    if(searchResult.length>maxLen){
+      searchResult = searchResult.slice(0,maxLen);
+    }
+    let header='';
+    return searchResult.map((result,index)=>{
+      if(typeof result==="string"){
+        header = result;
+      }else if (typeof result==="object") {
+        if(result["media_type"]=="movie"){
+          header = result.title;
+        }
+        else if (result["media_type"]=="tv" || result["media_type"]=="person" ) {
+          header = result.name;
+        }
+        // else if (result["media_type"]=="person") {
+        //   header = result.name;
+        // }
+      }
+      return <ListGroupItem key={index} tag="button" action>{header}</ListGroupItem>;
+    });
+  }
 }
 
 export default HomePage;
